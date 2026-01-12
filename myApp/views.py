@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .models import person
+from django.core.mail import send_mail
 
 # Create your views here.
 def home(request):
@@ -19,8 +20,30 @@ def form(request):
         image=request.FILES.get('image')
         p=person(name=name,email=email,age=age,city=city,message=message,image=image)
         p.save()
+        send_mail(
+            subject="New person added",
+            message=f"{name} from {city} was created.",
+            from_email=None,
+            recipient_list=["zororonoa0305@gmail.com"],
+            fail_silently=True,
+        )
         return redirect('home')
     return render(request,'form.html')
+
+def sendEmail(request):
+    if request.method=="POST":
+        subject=request.POST.get('subject')
+        email=request.POST.get('email')
+        message=request.POST.get('message')
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=None,
+            recipient_list=[email],
+            fail_silently=True,
+        )
+        return HttpResponse("Email sent successfully")
+    return render(request,'send_email.html')
 
 def update(request,id):
     obj=person.objects.get(id=id)

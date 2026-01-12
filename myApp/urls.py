@@ -10,4 +10,5 @@ urlpatterns = [
     path('delete/<int:id>/', views.deleteData , name='delete'),
     path('harddelete/<int:id>/', views.hardDelete , name='harddelete'),
     path('restore/<int:id>/', views.restore , name='restore'),
+    path('sendemail/', views.sendEmail , name='sendEmail'),
 ]
