@@ -11,4 +11,6 @@ urlpatterns = [
     path('harddelete/<int:id>/', views.hardDelete , name='harddelete'),
     path('restore/<int:id>/', views.restore , name='restore'),
     path('sendemail/', views.sendEmail , name='sendEmail'),
+    path('register/', views.register , name='register'),
+    path('login/', views.loginUser , name='login'),
 ]

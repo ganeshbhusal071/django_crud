@@ -2,7 +2,8 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .models import person
 from django.core.mail import send_mail
-
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 # Create your views here.
 def home(request):
     obj=person.objects.filter(isdelete=False)
@@ -81,3 +82,31 @@ def restore(request,id):
     obj.isdelete=False
     obj.save()
     return redirect('home')
+
+def register(request):
+    if request.method=="POST":
+        username=request.POST.get('username')
+        email=request.POST.get('email')
+        password=request.POST.get('password')
+        confirm_password=request.POST.get('confirm_password')
+        
+        if password==confirm_password:
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.save()
+            return redirect('login')
+        else:
+            return HttpResponse("Password and Confirm Password do not match")
+    return render(request, 'register.html')
+
+def loginUser(request):
+    if request.method=="POST":
+        username=request.POST.get('username')
+        password=request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+    
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        return HttpResponse("Invalid username or password")
+    return render(request, 'login.html')
