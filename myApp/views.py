@@ -2,9 +2,14 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from .models import person
 from django.core.mail import send_mail
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+
 # Create your views here.
+
 def home(request):
     obj=person.objects.filter(isdelete=False)
     return render(request, 'home.html',{'obj':obj, 'obj_deleted': person.objects.filter(isdelete=True)})
@@ -31,6 +36,7 @@ def form(request):
         return redirect('home')
     return render(request,'form.html')
 
+
 def sendEmail(request):
     if request.method=="POST":
         subject=request.POST.get('subject')
@@ -43,8 +49,9 @@ def sendEmail(request):
             recipient_list=[email],
             fail_silently=True,
         )
-        return HttpResponse("Email sent successfully")
+        messages.success(request, "Email sent successfully")
     return render(request,'send_email.html')
+
 
 def update(request,id):
     obj=person.objects.get(id=id)
@@ -66,16 +73,19 @@ def update(request,id):
         return redirect('home')
     return render(request,'update.html',{'obj':obj})
 
+
 def deleteData(request,id):
     obj=person.objects.get(id=id)
     obj.isdelete=True
     obj.save()
     return redirect('home')
 
+
 def hardDelete(request,id):
     obj=person.objects.get(id=id)
     obj.delete()
     return redirect('home')
+
 
 def restore(request,id):
     obj=person.objects.get(id=id)
@@ -90,23 +100,35 @@ def register(request):
         password=request.POST.get('password')
         confirm_password=request.POST.get('confirm_password')
         
+        if User.objects.filter(username=username).exists():
+            messages.error(request,"Username already exists")
+            return redirect('register')
+        
         if password==confirm_password:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
+            messages.success(request, "Registration successful! Please login.")
             return redirect('login')
         else:
-            return HttpResponse("Password and Confirm Password do not match")
+            messages.error(request,"Password and Confirm Password do not match")
     return render(request, 'register.html')
+
 
 def loginUser(request):
     if request.method=="POST":
-        username=request.POST.get('username')
-        password=request.POST.get('password')
+        username=request.POST['username']
+        password=request.POST['password']
         
-        user = authenticate(request, username=username, password=password)
-    
+        if not User.objects.filter(username=username).exists():
+            messages.error(request,"username doesn't exist")
+            return redirect('login')
+        user=authenticate(username=username,password=password)
+        
         if user is not None:
-            login(request, user)
+            auth_login(request,user)
             return redirect('home')
-        return HttpResponse("Invalid username or password")
-    return render(request, 'login.html')
+        else:
+            messages.error(request,"invalid password")
+            return redirect('login')
+    return render(request,'login.html')
+            

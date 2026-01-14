@@ -128,3 +128,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "ganeshbhusal210@gmail.com"
 EMAIL_HOST_PASSWORD = "dobt mbuq xgny fdhy"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
